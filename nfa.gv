@@ -1,0 +1,5 @@
+digraph {
+	s0 [shape=circle]
+	s0 -> s1 [label="ϵ"]
+	s1 [shape=doublecircle]
+}
