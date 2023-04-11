@@ -258,63 +258,6 @@ class NFA:
         return graph
 
 
-def nfa_to_dfa2(nfa):
-    symbols = nfa.get_symbols()
-    nfaDict = nfa.to_dict()
-    # initialize the DFA with the start state
-    start = frozenset([nfaDict['startingState']])
-    dfa = {}
-    unmarked_states = [start]
-    dfa[start] = State(label=str(start), is_start=True)
-    
-    while unmarked_states:
-        current_state = unmarked_states.pop()
-        current_dfa_state = dfa[current_state]
-        
-        for symbol in symbols:
-            new_state = frozenset(nfa.getClosure(current_state, symbol))
-            if not new_state:
-                continue
-            if new_state not in dfa:
-                dfa[new_state] = State(label=str(new_state))
-                unmarked_states.append(new_state)
-            current_dfa_state.add_transition(symbol, dfa[new_state])
-    
-    # update accept property of states in DFA
-    for dfa_state in dfa.values():
-        for nfa_state in dfa_state.label:
-            if nfaDict[nfa_state]['isTerminatingState']:
-                dfa_state.is_accept = True
-                break
-    
-    return dfa
-def nfa_to_dfa(nfa):
-    nfaStates = nfa.get_states()
-    symbols = nfa.get_symbols()
-    dfaStates = {}
-    for state in nfaStates:
-        for symbol in symbols:
-            states = list(nfa.getClosure(state, symbol))
-            # order the list of states
-            states.sort(key=lambda x: x.label)
-            # convert into a string representation
-            newState = ''
-            for state in states:
-                newState += ' ' + state.label
-            if newState not in dfaStates:
-                # add this to the dictionary, newState: 'isTerminatingState' = False, 'transitions' = {}
-                dfaStates[newState] = {'isTerminatingState': False, 'transitions': {}}
-                # dfaStates[newState] = {'isTerminatingState' = False, 'transitions' = {}}
-        
-    # for states in dfaStates:
-    #     for state in states:
-    #         if state.is_accept:
-    #             dfaStates[states].is_accept = True
-    #             break
-    return dfaStates
-    # start, accept = State('S' + str(i)), State('S' + str(i + 1))
-    # start.add_transition(c, accept)
-    # nfaStack.append(NFA(start, accept))
 
 from collections import deque
 def epsilon_closure(states):
@@ -335,64 +278,63 @@ def epsilon_closure(states):
     closureString = ''
     for state in closureList:
         closureString += ' ' + state.label
-    return closureString
+    # remove the first space
+    return closureString[1:]
 
 
-def move(nfaDict, states, symbol):
-    # convert states into a list
-    states = states.split()
-    move_states = set()
+def getStateByLabel(states, label):
     for state in states:
-        state = nfaDict[state].copy()
-        # remove the isTerminatingState key
-        # state.pop('isTerminatingState')
-        for item in state.items():
-            print(item)
-            next_states = item['a'] 
-            for next_state in next_states:
+        if state.label == label:
+            return state
+    return None
+
+def move(nfaStates, states, symbol):
+    move_states = set()
+    # convert string to list
+    statesList = states.split()
+    # convert list of labels to list of states
+    states = []
+    for label in statesList:
+        states.append(getStateByLabel(nfaStates, label))
+    for state in states:
+        for s, next_state in state.transitions:
+            if s == symbol:
                 move_states.add(next_state)
     return move_states
 
-
-def nfa_to_dfa3(nfa):
-    states = nfa.get_states()
+def checkIfAcceptingState(nfaStates, statesList):
+    statesList = statesList.split()
+    states = []
+    for label in statesList:
+        states.append(getStateByLabel(nfaStates, label))
+    for state in states:
+        if state.is_accept:
+            return True
+    return False
+def nfa_to_dfa(nfa):
+    nfaStates = nfa.get_states()
     nfaDict = nfa.to_dict()
     symbols = nfa.get_symbols()
     # initial state
-    start_state = epsilon_closure([states[0]])
+    start_state = epsilon_closure([nfaStates[0]])
     dfa = {'startingState': start_state}
-    # the rest of the states
+    # the rest of the nfaStates
     queue = deque([start_state])
     seen = set([start_state])
     while queue:
         current_state = queue.popleft()
         for symbol in symbols:
-            next_states = epsilon_closure(move(nfaDict, current_state, symbol))
-            if not next_states:
+            next_states = epsilon_closure(move(nfaStates, current_state, symbol))
+            if next_states == '' or next_states == ' ':
                 continue
-            next_state = frozenset(next_states)
-            if next_state not in seen:
-                queue.append(next_state)
-                seen.add(next_state)
-            dfa.setdefault(current_state, {})[symbol] = next_state
+            if next_states not in seen:
+                queue.append(next_states)
+                seen.add(next_states)
+            dfa.setdefault(current_state, {})[symbol] = next_states
+        dfa.setdefault(current_state, {})['isTerminatingState'] = checkIfAcceptingState(nfaStates, current_state)
     return dfa
 
 
-def dfa_to_dict(dfa):
-    dfaDict = {}
-    i = -1
-    for item in dfa.values():
-        if isinstance(item, frozenset):
-            for state in item:                
-                print(state.label, " ",end=" ")
-        elif isinstance(item, dict):
-            print(item)
-            for symbol, next_states in item.items():
-                print("\nsymbol: ", symbol)
-                for state in next_states:
-                    print(state.label, " ",end=" ")
-    print()
-    return dfaDict
 
 
 def main():
@@ -411,41 +353,24 @@ def main():
     print("NFA: ", nfa.to_dict())
     nfa.visualize(name='nfa.gv', view=False)
     print("----------------------------------------------------------------")
-    # states = nfa.get_states()
-    # state = states[1]
-    # print("state: ", state.label)
-    # closure = nfa.getClosure(state,'a')
-    # for state in closure:
-    #     print(state.label)
-    # print(nfa.get_symbols())
-    dfa = nfa_to_dfa3(nfa)
-    # for item in dfa.values():
-    #     if isinstance(item, frozenset):
-    #         for state in item:
-    #             print(state.label, " ",end=" ")
-    #     elif isinstance(item, dict):
-    #         for symbol, next_states in item.items():
-    #             print("\nsymbol: ", symbol)
-    #             for state in next_states:
-    #                 print(state.label, " ",end=" ")
-    dfa_to_dict(dfa)
-    # print("DFA: ", dfa)
+    dfa = nfa_to_dfa(nfa)
+    print("DFA: ", dfa)
     # Print the DFA states
-    # graph = graphviz.Digraph(engine='dot')
-    # for state, transitions in dfa.items():
-    #     if state == 'startingState':
-    #         continue
-    #     if transitions['isTerminatingState']:
-    #         graph.node(state, shape='doublecircle')
-    #     else:
-    #         graph.node(state, shape='circle')
-    #     for char, next_state in transitions.items():
-    #         if char == 'isTerminatingState':
-    #             continue
-    #         children_states = next_state.split(',')
-    #         for child in children_states:
-    #             graph.edge(state, child, label=char)
-    # graph.render("name", view=False)
+    graph = graphviz.Digraph(engine='dot')
+    for state, transitions in dfa.items():
+        if state == 'startingState':
+            continue
+        if transitions['isTerminatingState']:
+            graph.node(state, shape='doublecircle')
+        else:
+            graph.node(state, shape='circle')
+        for char, next_state in transitions.items():
+            if char == 'isTerminatingState':
+                continue
+            children_states = next_state.split(',')
+            for child in children_states:
+                graph.edge(state, child, label=char)
+    graph.render("dfa", view=False)
     
 
 
