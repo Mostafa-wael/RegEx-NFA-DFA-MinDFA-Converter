@@ -1,11 +1,12 @@
 from regex2nfa import NFA, validate_regex, shunt_yard, postfix_to_nfa
 from nfa2dfa import DFA
 from dfa2min import dfa2min
+import graphviz
 def main():
     # regex = "([A-Ea-c]+.1)|(2.[0-9]*.K?.[ABC].A.B.C)"
     regex = "([A-Ea-c]+1)|(2[0-9]*K?[ABC]ABC)"
     # regex = "ab(b|c)*d+"
-    regex = "(a+b)*"
+    regex = "ab(b|c)*d+"
     # regex = input("Enter regular expression: ")
     if not validate_regex(regex):
         return
@@ -22,6 +23,23 @@ def main():
     dfa.visualize(name='output/dfa.gv', view=False)
     print("----------------------------------------------------------------")
     min_dfa = dfa2min(dfa)
+    print("Minimized DFA: ", min_dfa)
+    graph = graphviz.Digraph(engine='dot')
+    for state, transitions in min_dfa.items():
+        if state == 'startingState':
+            continue
+        if transitions['isTerminatingState']:
+            graph.node(state, shape='doublecircle')
+        else:
+            graph.node(state, shape='circle')
+        for char, next_state in transitions.items():
+            if char == 'isTerminatingState':
+                continue
+            children_states = next_state.split(',')
+            for child in children_states:
+                graph.edge(state, child, label=char)
+    graph.render("output/min", view=False)
+
 
     
 
