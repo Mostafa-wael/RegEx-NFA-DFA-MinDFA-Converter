@@ -1,5 +1,5 @@
 import re
-def validate_regex(regex):
+def validateRegex(regex):
     try:
         re.compile(regex)
     except re.error:

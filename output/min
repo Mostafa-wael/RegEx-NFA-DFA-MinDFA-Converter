@@ -7,6 +7,6 @@ digraph {
 	2 -> 3 [label=b]
 	3 [shape=circle]
 	3 -> 0 [label=d]
-	3 -> 3 [label=c]
 	3 -> 3 [label=b]
+	3 -> 3 [label=c]
 }
