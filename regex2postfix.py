@@ -94,7 +94,6 @@ class POSTFIX:
             # If the character is a operand (i.e. not an operator or parenthesis), append it to the postfix string.
             else:
                 postfix = postfix + c
-            print("postfix4: ", regex)
         # After iterating over all characters of the regular expression, the function pops any remaining operators off the stack and appends them to the postfix string.
         while stack:
             postfix, stack = postfix + stack[-1], stack[:-1]

@@ -7,7 +7,7 @@ from regex2postfix import POSTFIX, validateRegex
 def main():
     cases = {0: 'ab(b|c)*d+', 1: ' (AB)', 2: '(A|B)', 3: '([A-Z])', 4: '(A)+', 5: '(A)*', 6: '(((AB)((A|B)*))(AB))', 7: '((((AB)|[A-Z])+)([A-Z]*))', 8: '(((((ABE)|C)|((([A-Z])S)*))+)((AB)C))',
              9: '((([a-z_])(([a-z0-9_])*))(([!?])?))', 10: '(A(((B*)|(DA))*))((CG)|(D([DEF])))', 11: '(ab', 12: '(a([b-c))', 13: '((a|b)|)', 14: '(a{3,2})'}
-    regex = cases[7]
+    regex = cases[0]
     # 7
 
     # regex = input("Enter regular expression: ")
