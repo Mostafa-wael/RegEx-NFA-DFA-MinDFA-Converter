@@ -38,6 +38,8 @@ class MIN_DFA:
         while split:
             split = False # [[{key1: {a: key1, b: key2}}, {key2: {a: w}}] [{key3: {a: key1, b: key2}}, {}]]
             for i, group in enumerate(groups): # [{key1: {a: key1, b: key2}}, {key2: {a: key3}}] [{key3: {a: key1, b: key2}}, {}]
+                if not group:
+                    continue 
                 targetGroups = {}
                 first_state = next(iter(group)) # {key1: {a: key1, b: key2}}
                 for key, value in first_state.items():

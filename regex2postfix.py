@@ -60,11 +60,13 @@ class POSTFIX:
         # Insert a concatenation operator (.) between any two adjacent characters(characters that are not operators), unless the characters are already separated by an operator, or the second character is an opening parenthesis.
         dotIndices = []
         for i in range(len(regex) - 1):
-            twoConsecutiveChar = regex[i].isalnum() and regex[i + 1].isalnum()
-            operatorsNotFollowedByDot = regex[i] in ('*', '+', '?') and regex[i + 1] != '.'
-            charFollowedByOpenBracket = regex[i].isalnum() and regex[i + 1] == '('
-            if twoConsecutiveChar or operatorsNotFollowedByDot or charFollowedByOpenBracket:
+            startOps = [')', "*","+", "*"]
+            endOps = ["*", "+", ".", "|", ")"]
+            if regex[i] in startOps and regex[i+1] not in endOps:
                 dotIndices.append(i)
+            elif regex[i].isalnum() and (regex[i+1].isalnum() or regex[i+1] == '('):
+                dotIndices.append(i)
+        
         for i in range(len(dotIndices)):
             regex = regex[:dotIndices[i] + 1 + i] + '.' + regex[dotIndices[i] + 1 + i:]
         print("postfix3: ", regex)
@@ -74,7 +76,6 @@ class POSTFIX:
             # If the character is an opening parenthesis, push it onto the stack.
             if c == '(':
                 stack = stack + c
-
             # If the character is a closing parenthesis, pop operators off the stack and append them to the postfix string until an opening parenthesis is found. Then pop the opening parenthesis from the stack.
             elif c == ')':
                 while stack[-1] != '(':
@@ -93,11 +94,11 @@ class POSTFIX:
             # If the character is a operand (i.e. not an operator or parenthesis), append it to the postfix string.
             else:
                 postfix = postfix + c
-
+            print("postfix4: ", regex)
         # After iterating over all characters of the regular expression, the function pops any remaining operators off the stack and appends them to the postfix string.
         while stack:
             postfix, stack = postfix + stack[-1], stack[:-1]
-        print("postfix4: ", regex)
+        print("postfix5: ", regex)
 
         # Finally, the function returns the postfix notation of the input regular expression.
         return postfix
