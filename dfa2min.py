@@ -5,16 +5,16 @@ class MIN_DFA:
     def __init__(self, dfa):
         self.dfa = dfa
         self.states = self.dfa2min(dfa)
-    def to_dict(self):
-        return self.states
+    # Utility functions
     def getGroupKeys(self, group):
         keys = []
         for state in group:
             for key, value in state.items():
                 keys.append(key)
         return keys
+    # COnversion from DFA to Minimized DFA
     def dfa2min(self, dfa):
-        states = dfa.to_dict()
+        states = dfa.toDict()
         symbols = dfa.getSymbols()
         # remove the final states from dfa
         states.pop('startingState')
@@ -58,11 +58,9 @@ class MIN_DFA:
                 if len(splitted_states) > 0:
                     groups.insert(i+1, list(splitted_states))
                     groups[i] = [state for state in group if state not in splitted_states]        
-        newGroups = self.concat_states(groups)
+        newGroups = self.concatStates(groups)
         return newGroups
-
-
-    def concat_states(self, groups):
+    def concatStates(self, groups):
         # create a hashtable for the states with the group number as the key
         hashTable = {}
         for g, group in enumerate(groups):
@@ -86,6 +84,9 @@ class MIN_DFA:
                             value[symbol] = str(hashTable[next_state])
                             newGroups[str(g)] = value
         return newGroups
+    # For exporting the minimized DFA
+    def toDict(self):
+        return self.states
     def visualize(self, name='output/min.gv', view=False):
         graph = graphviz.Digraph(engine='dot')
         for state, transitions in self.states.items():

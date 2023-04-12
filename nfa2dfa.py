@@ -5,19 +5,16 @@ from collections import deque
 class DFA:
     def __init__(self, nfa):
         self.nfa = nfa
-        self.states = self.nfa_to_dfa(nfa)
+        self.states = self.nfa2dfa(nfa)
+    # utility functions
     def getStateByLabel(self, label):
         return self.nfa.getStateByLabel(label)
     def getStatesByLabel(self, labels):
         return self.nfa.getStatesByLabel(labels)
-    def checkIfAcceptingState(self, states):
-        for state in states:
-            if state.is_accept:
-                return True
-        return False
     def getSymbols(self):
-        return self.nfa.get_symbols()
-    def epsilon_closure(self, states):
+        return self.nfa.getSymbols()
+    # DFA functions
+    def epsilonClosure(self, states):
         closure = set(states)
         stack = list(states)
         while stack:
@@ -37,7 +34,6 @@ class DFA:
             closureString += ' ' + state.label
         # remove the first space
         return closureString[1:]
-
     def move(self, nfa, states, symbol):
         move_states = set()
         # convert string to list
@@ -51,12 +47,12 @@ class DFA:
                 if s == symbol:
                     move_states.add(next_state)
         return move_states
-
-    def nfa_to_dfa(self, nfa):
-        nfaStates = nfa.get_states()
-        symbols = nfa.get_symbols()
+    # Conversion from NFA to DFA
+    def nfa2dfa(self, nfa):
+        nfaStates = nfa.getStates()
+        symbols = nfa.getSymbols()
         # initial state
-        start_state = self.epsilon_closure([nfaStates[0]])
+        start_state = self.epsilonClosure([nfaStates[0]])
         self.states = {'startingState': start_state}
         # the rest of the nfaStates
         queue = deque([start_state])
@@ -64,7 +60,7 @@ class DFA:
         while queue:
             current_state = queue.popleft()
             for symbol in symbols:
-                next_states = self.epsilon_closure(self.move(nfa, current_state, symbol))
+                next_states = self.epsilonClosure(self.move(nfa, current_state, symbol))
                 if next_states == '' or next_states == ' ':
                     continue
                 if next_states not in seen:
@@ -73,7 +69,8 @@ class DFA:
                 self.states.setdefault(current_state, {})[symbol] = next_states
             self.states.setdefault(current_state, {})['isTerminatingState'] = nfa.checkIfAcceptingState(nfa.getStatesByLabel(current_state))
         return self.states
-    def to_dict(self):
+    # for exporting the DFA
+    def toDict(self):
         return self.states.copy()
     def visualize(self, name='output/dfa.gv', view=False):
         graph = graphviz.Digraph(engine='dot')

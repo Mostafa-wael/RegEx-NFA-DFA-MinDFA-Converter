@@ -5,11 +5,56 @@ class NFA:
         self.start = start
         self.accept = accept
         if not start and not accept and postfix:
-            obj = self.postfix_to_nfa(postfix)
+            obj = self.postfix2nfa(postfix)
             self.start = obj.start
             self.accept = obj.accept
+    # utility functions
+    def getStateByLabel(self, label):
+        for state in self.getStates():
+            if state.label == label:
+                return state
+        return None
+    def getStatesByLabel(self, labels):
+        labels = labels.split()
+        statesList = []
+        for label in labels:
+            for state in self.getStates():
+                if state.label == label:
+                    statesList.append(state)
+        return statesList
+    def checkIfAcceptingState(self, states):
+        for state in states:
+            if state.is_accept:
+                return True
+        return False
+    def getStates(self):
+        visited = set()
+        states = []
+        queue = [self.start]
+        visited.add(self.start)
+        while queue:
+            state = queue.pop(0)
+            states.append(state)
+            for (transition) in state.transitions:
+                if transition[1] not in visited:
+                    visited.add(transition[1])
+                    queue.append(transition[1])
 
-    def postfix_to_nfa(self, postfix):
+        return states
+    def getSymbols(self):
+        """
+        Returns the set of symbols that can be used to transition between NFA states.
+        """
+        states = self.getStates()
+        symbols = set()
+        for state in states:
+            for symbol, next_state in state.transitions:
+                if symbol != 'ϵ':
+                    symbols.add(symbol)
+        # convert to list of symbols
+        return list(symbols)
+    # Conversion from postfix to NFA
+    def postfix2nfa(self, postfix): # shunting yard algorithm
         nfaStack = []
         i = 0
         for c in postfix:
@@ -63,28 +108,10 @@ class NFA:
                 i += 2
 
         return nfaStack.pop()
-    def getStateByLabel(self, label):
-        for state in self.get_states():
-            if state.label == label:
-                return state
-        return None
-    def getStatesByLabel(self, labels):
-        labels = labels.split()
-        statesList = []
-        for label in labels:
-            for state in self.get_states():
-                if state.label == label:
-                    statesList.append(state)
-        return statesList
-    def checkIfAcceptingState(self, states):
-        for state in states:
-            if state.is_accept:
-                return True
-        return False
-
-    def to_dict(self):
+    # For exporting NFA
+    def toDict(self):
         states = {}
-        for state in self.get_states():
+        for state in self.getStates():
             state_dict = {
                 'isTerminatingState': state.is_accept,
             }
@@ -99,34 +126,8 @@ class NFA:
             'startingState': self.start.label,
             **states,
         }
-    def get_states(self):
-        visited = set()
-        states = []
-        queue = [self.start]
-        visited.add(self.start)
-        while queue:
-            state = queue.pop(0)
-            states.append(state)
-            for (transition) in state.transitions:
-                if transition[1] not in visited:
-                    visited.add(transition[1])
-                    queue.append(transition[1])
-
-        return states
-    def get_symbols(self):
-        """
-        Returns the set of symbols that can be used to transition between NFA states.
-        """
-        states = self.get_states()
-        symbols = set()
-        for state in states:
-            for symbol, next_state in state.transitions:
-                if symbol != 'ϵ':
-                    symbols.add(symbol)
-        # convert to list of symbols
-        return list(symbols)
     def visualize(self, name='output/nfa.gv', view=False):
-        nfa_json = self.to_dict()
+        nfa_json = self.toDict()
         graph = graphviz.Digraph(engine='dot')
         for state, transitions in nfa_json.items():
             if state == 'startingState':
