@@ -1,5 +1,0 @@
-{'S0': {'a': 'S1 S2', 'isTerminatingState': False}},
-{'S1 S2': {'b': 'S10 S11 S12 S14 S3 S4 S6 S8', 'isTerminatingState': False}},
-{'S10 S11 S12 S14 S3 S4 S6 S8': {'d': 'S12 S13 S14 S15', 'b': 'S10 S11 S12 S14 S4 S5 S6 S8 S9', 'c': 'S10 S11 S12 S14 S4 S6 S7 S8 S9', 'isTerminatingState': False}}, 
-{'S10 S11 S12 S14 S4 S5 S6 S8 S9': {'d': 'S12 S13 S14 S15', 'b': 'S10 S11 S12 S14 S4 S5 S6 S8 S9', 'c': 'S10 S11 S12 S14 S4 S6 S7 S8 S9', 'isTerminatingState': False}}, 
-{'S10 S11 S12 S14 S4 S6 S7 S8 S9': {'d': 'S12 S13 S14 S15', 'b': 'S10 S11 S12 S14 S4 S5 S6 S8 S9', 'c': 'S10 S11 S12 S14 S4 S6 S7 S8 S9', 'isTerminatingState': False}}
